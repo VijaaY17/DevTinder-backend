@@ -1,5 +1,6 @@
 const express = require('express')
 const mongodb = require('./config/database.js')
+const User = require('./model/user.js')
 const app = express()
 
 // app.use("/",(req,res) =>{
@@ -23,6 +24,23 @@ app.get("/test/:userid",(req,res) =>{
 
 app.post("/test",(req,res) =>{
   res.send("Post request")
+})
+
+app.post("/signup",async(req,res) =>{
+  try{
+  
+  const data = {
+    firstName : "abd",
+    lastName : "villiers",
+  }
+
+  const newUser = new User(data)
+
+  await newUser.save()
+  res.send("User added successfully")
+} catch(err) {
+  console.log("Error in adding the user" + err.message)
+}
 })
 
 app.delete("/test",(req,res,next) =>{
