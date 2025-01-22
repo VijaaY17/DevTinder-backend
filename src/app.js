@@ -3,6 +3,9 @@ const mongodb = require('./config/database.js')
 const User = require('./model/user.js')
 const app = express()
 
+
+app.use(express.json())
+
 // app.use("/",(req,res) =>{
 //   res.send("Test page")
 // })
@@ -28,19 +31,77 @@ app.post("/test",(req,res) =>{
 
 app.post("/signup",async(req,res) =>{
   try{
-  
-  const data = {
-    firstName : "abd",
-    lastName : "villiers",
-  }
-
-  const newUser = new User(data)
+  const newUser = new User(req.body)
 
   await newUser.save()
   res.send("User added successfully")
 } catch(err) {
   console.log("Error in adding the user" + err.message)
 }
+})
+
+app.get("/user",async(req,res) =>{
+  try{
+  const name = req.body.firstName
+  console.log(name)
+  const available =  await User.findById({firstName:name})
+  console.log(available)
+    res.send(available)
+} catch(err)
+{
+  res.status(404).send("Email could not find")
+}
+})
+
+app.get("/feed",async(req,res) =>{
+  try{
+      const data = await User.find({})
+      if(!data)
+      {
+        res.status(404).send("No data found")
+      }
+      else{
+      res.send(data)
+      }
+  } catch(err)
+  {
+      console.log("No user found")
+  }
+
+})
+
+app.patch("/user/:userId",async(req,res) =>{
+  try{
+  // const id = req.body._id
+  const userId = req.params.userId
+  const data = req.body
+  const allowed_updates = ['firstName','lastName','password','skills','about']
+  // const isUpdateAllowed = Object.keys(data).every((k) => allowed_updates.includes(k))
+  const isUpdateAllowed = Object.keys(data).every((key) => allowed_updates.includes(key));
+  if(!isUpdateAllowed) throw new Error("Cannot be updated")
+  const updated = await User.findByIdAndUpdate(userId,data,{new:true, runValidators: true })
+  if (!updated) {
+    return res.status(404).send("User not found.");
+  }
+  console.log(updated)
+  res.send(updated)
+  } catch(err)
+  {
+    console.log("Cannot update:" + err.message)
+  }
+})
+
+app.delete("/user",async(req,res) => {
+  
+  try{
+    const id = req.body.id
+      await User.findOneAndDelete({_id:id})
+      res.send("Deleted successfully")
+
+  }catch(err)
+  {
+    console.log("Cant delete")
+  }
 })
 
 app.delete("/test",(req,res,next) =>{
