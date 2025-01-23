@@ -2,11 +2,15 @@ const express = require('express')
 const mongodb = require('./config/database.js')
 const User = require('./model/user.js')
 const bcrypt = require('bcrypt')
+const cookieParser = require('cookie-parser')
+const jwt = require('jsonwebtoken')
 const {SignUpValidator} = require('./utils/validation.js')
+const {userAuth} = require('./middleware/userAuth.js')
 const app = express()
 
 
 app.use(express.json())
+app.use(cookieParser())
 
 // app.use("/",(req,res) =>{
 //   res.send("Test page")
@@ -31,11 +35,35 @@ app.post("/test",(req,res) =>{
   res.send("Post request")
 })
 
+app.get("/profile",userAuth,async(req,res) =>{
+  try{
+  // const cookie = req.cookies
+  // console.log(cookie)
+  // const {token} = cookie
+  // if(!token) throw new Error("Invalid token")
+  // console.log(token)
+  // const isValidToken = await jwt.verify(token,"DevTinder@123")
+  // console.log(isValidToken)
+  // const {_id} = isValidToken
+  // const user = await User.findById(_id)
+  // if(!user) throw new Error("Invalid user")
+  // console.log(user) 
+  const user = req.user
+  res.send(user)
+
+  } catch(err)
+  {
+    console.log("Error : " + err.message)
+  }
+
+})
+
 app.post("/signup",async(req,res) =>{
   try{
     SignUpValidator(req)
     const {firstName,lastName,emailId,password,gender,skills,about,age} = req.body
     const hashedPassword = await bcrypt.hash(password,10)
+    
  
   const newUser = new User({
     firstName:firstName,
@@ -57,7 +85,7 @@ app.post("/login",async(req,res) => {
     const {emailId,password} = req.body
 
     const user = await User.findOne({emailId:emailId})
-    console.log(user)
+    // console.log(user)
     if(!user) throw new Error("Invalid EmailId")
     const comparePassword = await bcrypt.compare(password,user.password)
     if(!comparePassword)
@@ -65,6 +93,8 @@ app.post("/login",async(req,res) => {
       throw new Error("Invalid credentials")
     }
     else{
+      const token = jwt.sign({_id:user._id},"DevTinder@123")
+      res.cookie("token",token)
       res.send("Login successful")
     }
 
