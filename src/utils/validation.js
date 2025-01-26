@@ -12,12 +12,22 @@ const SignUpValidator = (req) =>
 
     }
 
-    
-
-
 }
+
+// const isValidateEditProfile = (req,res) => {
+//   const allowedUpdates = ["firstName","lastName","age","about","skills","gender"]
+//   const isUpdateAllowed = Object.keys(req.body).every((key) => allowedUpdates.includes(key))
+//   return isUpdateAllowed
+// }
+
+const isValidateEditProfile = (req) => {
+  const allowedUpdates = ["firstName", "lastName", "age", "about", "skills", "gender"];
+  const isUpdateAllowed = Object.keys(req.body).every((key) => allowedUpdates.includes(key));
+  return isUpdateAllowed;
+};
 
 
 module.exports = {
-  SignUpValidator
+  SignUpValidator,
+  isValidateEditProfile,
 }
