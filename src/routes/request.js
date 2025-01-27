@@ -25,9 +25,9 @@ requestRouter.post('/request/send/:status/:userId',userAuth,async(req,res) => {
   }
 
 
-  const existingConnectionRequest = ConnectionRequest.findOne({
+  const existingConnectionRequest = await ConnectionRequest.findOne({
     $or : [
-      {fromUserId,toUserId},
+      {fromUserId : fromUserId,toUserId : toUserId},
       {fromUserId : toUserId, toUserId : fromUserId}
     ]
   })
@@ -50,6 +50,30 @@ requestRouter.post('/request/send/:status/:userId',userAuth,async(req,res) => {
   res.status(400).send("Error : " + err.message)
 }
 
+})
+
+requestRouter.post("/request/review/:status/:requestId",userAuth,async (req,res) => {
+  const status = req.params.status
+  const requestId = req.params.requestId
+  const allowedStatus = ["accepted","rejected"]
+  const loggedInUser = req.user
+  const isAllowed = allowedStatus.includes(status)
+  if(!isAllowed)
+  {
+    throw new Error("Invalid status")
+  }
+  const connectionRequest = await ConnectionRequest.findOne({
+    toUserId : loggedInUser._id,
+    _id : requestId,
+    status : "interested"
+  })
+  if(!connectionRequest)
+  {
+    throw new Error("Connection request not found")
+  }
+  connectionRequest.status = status
+  const data = await connectionRequest.save()
+  res.send(data)
 })
 
 module.exports = requestRouter
