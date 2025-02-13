@@ -5,6 +5,10 @@ const userAuth = async(req,res,next) => {
   try
   {
     const {token} = req.cookies
+    if(!token)
+    {
+      return res.status(401).send("Please Login")
+    }
     const validToken = await jwt.verify(token,"DevTinder@123")
     const {_id} = validToken
     const user = await User.findById(_id)
