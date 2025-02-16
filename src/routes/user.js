@@ -11,7 +11,7 @@ userRouter.get("/user/requests/received",userAuth,async(req,res) => {
   const connectionRequest = await ConnectionRequest.find({
     toUserId : loggedInUser._id,
     status : "interested"
-  }).populate("fromUserId",[firstName,lastName])
+  }).populate("fromUserId",["firstName","lastName"])
 
 
   res.json({
@@ -28,17 +28,16 @@ userRouter.get("/user/requests/received",userAuth,async(req,res) => {
 userRouter.get("/user/connections",userAuth,async(req,res) =>{
   try{
   const loggedInUser = req.user
+  // console.log(loggedInUser)
   const connectionRequest = await ConnectionRequest.find({
-    $or : [
-      {
-        toUserId : loggedInUser._id,status : "accepted",
-        fromUserId : loggedInUser._id, status : "accepted"
-
-      }
+    $or: [
+      { toUserId: loggedInUser._id, status: "accepted" }, 
+      { fromUserId: loggedInUser._id, status: "accepted" }
     ]
-
-  }).populate("fromUserId",["firstName","lastName"])
-  .populate("toUserId",["firstName","lastName"])
+  })
+  .populate("fromUserId", ["firstName", "lastName","about"])
+  .populate("toUserId", ["firstName", "lastName","about"]);
+  // console.log(connectionRequest)
 
   const data = connectionRequest.map((row) =>{
     if(row.fromUserId._id.toString() === loggedInUser._id.toString()){
@@ -48,10 +47,11 @@ userRouter.get("/user/connections",userAuth,async(req,res) =>{
   })
 
 
-  res.send({
-    message : "Connections",
-    data : connectionRequest
-  })
+  // res.send({
+  //   message : "Connections",
+  //   data : connectionRequest
+  // })
+  res.json({ data });
 
 }catch(err)
 {
