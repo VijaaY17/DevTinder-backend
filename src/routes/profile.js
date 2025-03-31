@@ -16,7 +16,7 @@ profileRouter.get("/profile",userAuth,async(req,res) =>{
   // const {_id} = isValidToken
   // const user = await User.findById(_id)
   // if(!user) throw new Error("Invalid user")
-  // console.log(user) 
+  
   const user = req.user
   res.send(user)
 
