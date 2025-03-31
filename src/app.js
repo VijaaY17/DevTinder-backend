@@ -12,6 +12,7 @@ const authRouter = require('./routes/auth.js')
 const profileRouter = require('./routes/profile.js')
 const requestRouter = require('./routes/request.js')
 const userRouter = require('./routes/user.js')
+const http = require('http')
 
 app.use(cors({
   origin: "http://localhost:5173",
@@ -145,8 +146,10 @@ app.use("/user",[(req,res,next) =>{
   res.send("User 3")
 })
 
+const server = http.createServer(app)
+
 mongodb().then(()=>{
-  app.listen(3000, () =>{
+  server.listen(3000, () =>{
     console.log("Server is listening on port 3000")
   })
 })
