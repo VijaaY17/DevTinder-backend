@@ -13,6 +13,8 @@ const profileRouter = require('./routes/profile.js')
 const requestRouter = require('./routes/request.js')
 const userRouter = require('./routes/user.js')
 const http = require('http')
+const socket = require('socket.io')
+const initializeSocket = require('./utils/socket.js')
 
 app.use(cors({
   origin: "http://localhost:5173",
@@ -147,6 +149,9 @@ app.use("/user",[(req,res,next) =>{
 })
 
 const server = http.createServer(app)
+initializeSocket(server)
+
+
 
 mongodb().then(()=>{
   server.listen(3000, () =>{
