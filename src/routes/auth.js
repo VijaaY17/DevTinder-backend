@@ -33,7 +33,7 @@ authRouter.post("/login",async(req,res) => {
     const {emailId,password} = req.body
 
     const user = await User.findOne({emailId:emailId})
-    // console.log(user)
+  
     if(!user) throw new Error("Invalid EmailId")
     const comparePassword = await bcrypt.compare(password,user.password)
     if(!comparePassword)
